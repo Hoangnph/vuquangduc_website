@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: architect_portfolio_db
+    environment:
+      POSTGRES_DB: architect_portfolio
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - architect_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  strapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: architect_portfolio_strapi
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: architect_portfolio
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      NODE_ENV: development
+      STRAPI_ADMIN_EMAIL: ${STRAPI_ADMIN_EMAIL}
+      STRAPI_ADMIN_PASSWORD: ${STRAPI_ADMIN_PASSWORD}
+    volumes:
+      - ./src:/srv/app/src
+      - strapi_uploads:/srv/app/public/uploads
+      - strapi_node_modules:/srv/app/node_modules
+    ports:
+      - "1337:1337"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - architect_network
+    restart: unless-stopped
+    command: ["npm", "run", "develop"]
+
+volumes:
+  postgres_data:
+  strapi_uploads:
+  strapi_node_modules:
+
+networks:
+  architect_network:
+    driver: bridge 
