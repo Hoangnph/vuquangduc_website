@@ -108,6 +108,15 @@ interface Project {
   date: Date;
   content: RichText;
   partners: Partner[];
+  status: 'draft' | 'published';
+  publishedAt: DateTime;
+  updatedAt: DateTime;
+  seo: {
+    metaTitle: string;
+    metaDescription: string;
+    keywords: string[];
+    ogImage: Media;
+  };
 }
 
 // Partner
@@ -134,10 +143,10 @@ interface BlogPost {
   content: RichText;
   excerpt: string;
   featuredImage: Media;
-  author: User;
+  author: AdminUser;
   categories: BlogCategory[];
   tags: BlogTag[];
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published';
   publishedAt: DateTime;
   updatedAt: DateTime;
   seo: {
@@ -146,7 +155,7 @@ interface BlogPost {
     keywords: string[];
     ogImage: Media;
   };
-  readingTime: number; // in minutes
+  readingTime: number;
   viewCount: number;
   relatedPosts: BlogPost[];
 }
@@ -175,30 +184,137 @@ interface BlogTag {
 // Blog Comment
 interface BlogComment {
   content: string;
-  author: {
-    name: string;
-    email: string;
-    website?: string;
-  };
+  authorName: string;
+  authorEmail: string;
+  authorWebsite?: string;
   post: BlogPost;
   parent: BlogComment | null;
   status: 'pending' | 'approved' | 'spam';
   createdAt: DateTime;
+  ipAddress: string;
 }
 ```
 
 ### 4.2 API Endpoints
-- `/api/projects` - CRUD operations for projects
-- `/api/partners` - Partner management
-- `/api/testimonials` - Testimonial management
-- `/api/upload` - File upload handling
+
+#### 4.2.1 Public Endpoints (No Authentication Required)
+```typescript
+// Blog Posts
+GET /api/blog-posts
+  Query Parameters:
+    - page: number (default: 1)
+    - limit: number (default: 10)
+    - sort: string (e.g., "publishedAt:desc")
+    - category: string (slug)
+    - tag: string (slug)
+    - search: string
+    - status: "published"
+
+GET /api/blog-posts/:slug
+  Response includes:
+    - Post content
+    - Author details
+    - Categories and tags
+    - Related posts
+    - Approved comments
+    - Reading time
+    - View count
+
+// Projects
+GET /api/projects
+  Query Parameters:
+    - page: number
+    - limit: number
+    - category: string
+    - search: string
+    - status: "published"
+
+GET /api/projects/:slug
+  Response includes:
+    - Project details
+    - Images
+    - Categories
+    - Partners
+
+// Comments
+POST /api/blog-comments
+  Body:
+    - content: string
+    - post: string (id)
+    - authorName: string
+    - authorEmail: string
+    - authorWebsite?: string
+    - parent?: string (comment id)
+  Security:
+    - Rate limiting
+    - Spam protection
+    - CAPTCHA (optional)
+```
+
+#### 4.2.2 Admin Endpoints (Authentication Required)
+```typescript
+// Admin Authentication
+POST /api/auth/login
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+
+// Content Management (Admin Only)
+POST /api/blog-posts
+PUT /api/blog-posts/:id
+DELETE /api/blog-posts/:id
+PATCH /api/blog-posts/:id/publish
+PATCH /api/blog-posts/:id/unpublish
+
+// Comment Management (Admin Only)
+GET /api/blog-comments
+PUT /api/blog-comments/:id
+DELETE /api/blog-comments/:id
+PATCH /api/blog-comments/:id/approve
+PATCH /api/blog-comments/:id/reject
+
+// ... rest of admin endpoints ...
+```
 
 ### 4.3 Authentication & Authorization
-- JWT-based authentication
-- Role-based access control:
-  - Public
-  - Authenticated
-  - Admin
+
+#### 4.3.1 Frontend (Public Access)
+- Không yêu cầu authentication cho người dùng
+- Tất cả nội dung đều public và có thể truy cập tự do
+- Không có user accounts hay user management ở frontend
+- Không có user-specific features
+
+#### 4.3.2 Backend (Admin Only)
+- JWT-based authentication chỉ cho Strapi Admin Panel
+- Role-based access control cho admin:
+  - Super Admin: Toàn quyền quản lý hệ thống
+  - Editor: Quản lý nội dung (bài viết, dự án)
+  - Author: Tạo và quản lý bài viết của mình
+- API endpoints được bảo vệ:
+  - Public endpoints: Không yêu cầu authentication
+  - Admin endpoints: Yêu cầu JWT token hợp lệ
+- Rate limiting cho API endpoints:
+  - Public endpoints: 100 requests/minute
+  - Admin endpoints: 1000 requests/minute
+
+#### 4.3.3 Security Measures
+1. **API Security**:
+   - CORS configuration cho phép truy cập từ domain frontend
+   - Rate limiting để ngăn chặn DDoS
+   - Input validation và sanitization
+   - XSS protection
+
+2. **Admin Panel Security**:
+   - Strong password policy
+   - Two-factor authentication (optional)
+   - Session management
+   - IP whitelisting (optional)
+   - Audit logging
+
+3. **Content Security**:
+   - Media file validation
+   - File size limits
+   - Allowed file types restriction
+   - Secure file storage
 
 ### 4.4 Blog API Endpoints
 
