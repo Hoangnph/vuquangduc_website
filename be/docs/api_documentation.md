@@ -29,6 +29,7 @@ Response: {
           attributes: {
             url: string;
             alternativeText: string;
+            formats?: object;
           }
         }
       }
@@ -46,6 +47,98 @@ const getHeroContent = async () => {
 };
 ```
 
+## Partners Section API
+
+### Content Type: Partner
+```typescript
+interface Partner {
+  id: number;
+  name: string;          // Partner company name
+  description: string;   // Partner description (optional)
+  logo: Media;           // Partner logo image
+  website: string;       // Partner website URL (optional)
+  order: number;         // Display order
+  isActive: boolean;     // Partner status
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+}
+```
+
+### Endpoints
+
+#### 1. Get All Partners
+```typescript
+GET /api/partners
+Query Parameters:
+- sort: string (default: "order:asc")
+- isActive: boolean (default: true)
+
+Response: {
+  data: Partner[]
+}
+```
+
+#### 2. Get Single Partner
+```typescript
+GET /api/partners/:id
+Response: {
+  data: Partner
+}
+```
+
+#### Example Usage
+```typescript
+// app/_lib/api.ts
+export async function fetchPartners() {
+  const res = await fetch('http://localhost:1337/api/partners?sort=order:asc&isActive=true');
+  if (!res.ok) throw new Error('Failed to fetch partners');
+  return res.json();
+}
+```
+
+```tsx
+// app/components/partners-section.tsx
+import Image from 'next/image';
+import { fetchPartners } from '../_lib/api';
+
+export default async function PartnersSection() {
+  const { data: partners } = await fetchPartners();
+  
+  return (
+    <section className="py-12 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center mb-8">Our Partners</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {partners.map((partner) => (
+            <div key={partner.id} className="flex flex-col items-center">
+              <Image
+                src={`http://localhost:1337${partner.logo.url}`}
+                alt={partner.name}
+                width={200}
+                height={100}
+                className="object-contain"
+              />
+              <h3 className="mt-4 text-lg font-semibold">{partner.name}</h3>
+              {partner.website && (
+                <a
+                  href={partner.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline mt-2"
+                >
+                  Visit Website
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
 ## Other Home Page Sections
 
 ### Projects Section
@@ -57,15 +150,6 @@ Query Parameters:
 - sort: string (default: "publishedAt:desc")
 - status: "published"
 - featured: boolean (true) // Only get featured projects
-```
-
-### Partners Section
-```typescript
-GET /api/partners
-Query Parameters:
-- sort: string (default: "order:asc")
-- populate: ["logo"]
-- isActive: boolean (true)
 ```
 
 ### Testimonials Section
@@ -80,110 +164,11 @@ Query Parameters:
 
 ## Implementation Notes
 
-### 1. Hero Section Implementation
-- The hero section is a singleton content type in Strapi
-- Banner image should be optimized for web (recommended size: 1920x1080px)
-
-### 2. Image Optimization
-- Images are automatically processed by Strapi
-- Use WebP format with fallback
-
-## Strapi Configuration
-
-### 1. Content Type Builder
-```javascript
-// Hero Content Type Configuration
-{
-  kind: 'singleType',
-  collectionName: 'heroes',
-  info: {
-    singularName: 'hero',
-    pluralName: 'heroes',
-    displayName: 'Hero'
-  },
-  attributes: {
-    title: {
-      type: 'string',
-      required: true
-    },
-    subtitle: {
-      type: 'string',
-      required: true
-    },
-    description: {
-      type: 'richtext',
-      required: true
-    },
-    bannerImage: {
-      type: 'media',
-      multiple: false,
-      required: true,
-      allowedTypes: ['images']
-    }
-  }
-}
-```
-
-### 2. Permissions
-- Public access for GET requests
-- Admin-only access for POST, PUT, DELETE requests
-
-## Frontend Integration
-
-### 1. Component Implementation
-```typescript
-// components/HeroSection.tsx
-import Image from 'next/image';
-
-export const HeroSection = async () => {
-  const response = await fetch('/api/hero?populate=bannerImage');
-  const { data } = await response.json();
-  const { title, subtitle, description, bannerImage } = data.attributes;
-  
-  return (
-    <section className="relative h-screen">
-      <Image
-        src={bannerImage.data.attributes.url}
-        alt={bannerImage.data.attributes.alternativeText}
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-black/50">
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            {title}
-          </h1>
-          <h2 className="text-xl md:text-2xl text-white mb-6">
-            {subtitle}
-          </h2>
-          <p className="text-lg text-white/90 max-w-2xl">
-            {description}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-};
-```
-
-## Best Practices
-
-1. **Performance**
-   - Use Next.js Image component for optimized image loading
-   - Implement proper image sizing
-
-2. **Accessibility**
-   - Ensure proper contrast ratios for text
-   - Provide meaningful alt text for images
-
-3. **SEO**
-   - Use semantic HTML
-   - Implement proper heading hierarchy
-
-4. **Maintenance**
-   - Keep content types and API documentation in sync
-   - Implement proper error logging
-   - Monitor API performance
-   - Regular content backups 
+- Images are automatically processed by Strapi (WebP format recommended)
+- Use Next.js Image component for optimized image loading
+- Ensure proper contrast ratios and alt text for accessibility
+- Use semantic HTML and proper heading hierarchy for SEO
+- Public access for GET requests, admin-only for POST/PUT/DELETE
+- Keep content types and API documentation in sync
+- Implement proper error logging and monitor API performance
+- Regular content backups 
