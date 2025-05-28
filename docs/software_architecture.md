@@ -210,6 +210,36 @@ GET /api/blog-posts
     - search: string
     - status: "published"
 
+// Blog Search (Future Enhancement)
+GET /api/blog-posts/search
+  Query Parameters:
+    - q: string (search query)
+    - type: "title" | "content" | "all"
+    - category: string
+    - tag: string
+    - author: string
+    - dateRange: string
+  Response:
+    - Results: BlogPost[]
+    - Suggestions: string[]
+    - Facets: {
+        categories: Category[];
+        tags: Tag[];
+        authors: Author[];
+        dates: DateRange[];
+      }
+
+GET /api/blog-posts/suggestions
+  Query Parameters:
+    - q: string (search query)
+    - limit: number (default: 5)
+  Response:
+    - Suggestions: {
+        title: string;
+        slug: string;
+        type: "title" | "content";
+      }[]
+
 GET /api/blog-posts/:slug
   Response includes:
     - Post content
@@ -719,20 +749,19 @@ STRAPI_ADMIN_PASSWORD=your_admin_password_here
 - Automated testing
 - Monitoring and logging
 
-## 9. Future Considerations
+## 9. Future Enhancements
 
-### 9.1 Scalability
-- Cloud storage integration
-- CDN implementation
-- Database scaling
-- Microservices architecture (if needed)
+### 9.1 Blog System Enhancements
 
-### 9.2 Feature Roadmap
-- Multi-language support
-- Advanced search functionality
-- Project analytics
-- Partner portal
-- Blog system enhancement
+#### 9.1.1 Advanced Search System
+- Full-text search với PostgreSQL
+- Search suggestions
+- Search facets (category, tag, date)
+- Search analytics
+- Search result caching
+- Debounced search requests
+- Vietnamese language support
+- Search result highlighting
 
 ## 10. Development Guidelines
 
