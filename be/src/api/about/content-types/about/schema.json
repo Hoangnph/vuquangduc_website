@@ -1,0 +1,19 @@
+{
+  "kind": "singleType",
+  "collectionName": "abouts",
+  "info": {
+    "singularName": "about",
+    "pluralName": "abouts",
+    "displayName": "About",
+    "description": "About section for the home page"
+  },
+  "options": { "draftAndPublish": true },
+  "attributes": {
+    "title": { "type": "string", "required": true, "maxLength": 100 },
+    "description": { "type": "richtext", "required": true },
+    "avatar": { "type": "media", "multiple": false, "required": false, "allowedTypes": ["images"] },
+    "images": { "type": "media", "multiple": true, "required": false, "allowedTypes": ["images"] },
+    "highlight": { "type": "string", "required": false, "maxLength": 200 },
+    "video": { "type": "media", "multiple": false, "required": false, "allowedTypes": ["videos"] }
+  }
+} 
