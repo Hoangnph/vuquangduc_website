@@ -141,6 +141,56 @@ Query Parameters:
 
 ---
 
+## Blog System API (v1)
+
+### Blog Post
+- `GET /api/blog-posts`
+  - Params: `page`, `limit`, `category`, `tag`, `search`
+  - Response: Danh sách bài viết, phân trang, filter theo category, tag, search
+- `GET /api/blog-posts/:id`
+  - Lấy chi tiết bài viết theo id
+- `GET /api/blog-posts/slug/:slug`
+  - Lấy chi tiết bài viết theo slug (SEO friendly)
+- `POST /api/blog-posts` *(admin)*
+  - Tạo bài viết mới
+- `PUT /api/blog-posts/:id` *(admin)*
+  - Cập nhật bài viết
+- `DELETE /api/blog-posts/:id` *(admin)*
+  - Xóa bài viết
+- `PUT /api/blog-posts/:id/publish` *(admin)*
+  - Đăng bài viết
+- `PUT /api/blog-posts/:id/unpublish` *(admin)*
+  - Gỡ bài viết
+
+### Blog Category
+- `GET /api/blog-categories`
+  - Lấy danh sách category
+- `GET /api/blog-categories/:id`
+  - Lấy chi tiết category và các bài viết liên quan
+- `POST /api/blog-categories` *(admin)*
+  - Tạo category mới
+- `PUT /api/blog-categories/:id` *(admin)*
+  - Cập nhật category
+- `DELETE /api/blog-categories/:id` *(admin)*
+  - Xóa category
+
+### Blog Tag
+- `GET /api/blog-tags`
+  - Lấy danh sách tag
+- `GET /api/blog-tags/:id`
+  - Lấy chi tiết tag và các bài viết liên quan
+- `POST /api/blog-tags` *(admin)*
+  - Tạo tag mới
+- `PUT /api/blog-tags/:id` *(admin)*
+  - Cập nhật tag
+- `DELETE /api/blog-tags/:id` *(admin)*
+  - Xóa tag
+
+### Lưu ý
+- Các endpoint GET hỗ trợ filter, phân trang, populate relations (category, tag, author, featuredImage)
+- Các endpoint admin yêu cầu authentication (JWT)
+- Response trả về theo chuẩn Strapi v4 (data, meta)
+
 ## Implementation Notes
 - All media fields (avatar, images, logo, video) are Strapi Media type, support multiple formats.
 - Use Next.js Image component for optimized image loading.
