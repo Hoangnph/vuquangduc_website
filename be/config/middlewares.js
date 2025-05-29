@@ -7,6 +7,6 @@ module.exports = [
   'strapi::query',
   'strapi::body',
   'strapi::session',
-  // 'strapi::favicon', // Tắt middleware favicon để tránh lỗi ENOENT (không tìm thấy favicon.ico)
+  'strapi::favicon', // Tắt middleware favicon để tránh lỗi ENOENT (không tìm thấy favicon.ico)
   'strapi::public',
 ]; 

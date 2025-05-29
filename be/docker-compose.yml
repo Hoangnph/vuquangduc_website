@@ -4,9 +4,11 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: architect_portfolio_db
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: architect_portfolio
-      POSTGRES_USER: strapi
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -26,14 +28,16 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: architect_portfolio_strapi
+    env_file:
+      - .env
     environment:
-      DATABASE_CLIENT: postgres
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: architect_portfolio
-      DATABASE_USERNAME: strapi
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PASSWORD: ${DB_PASSWORD}
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV:-development}
       STRAPI_ADMIN_EMAIL: ${STRAPI_ADMIN_EMAIL}
       STRAPI_ADMIN_PASSWORD: ${STRAPI_ADMIN_PASSWORD}
     volumes:
